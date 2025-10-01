@@ -3,9 +3,9 @@ import os
 import ollama
 import openai
 from dotenv import load_dotenv
-from openai import OpenAI
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
 load_dotenv()
 
@@ -38,10 +38,9 @@ class WebpageSummarizer:
         return messages
 
     def summarize_with_openai(self):
-
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise ValueError("OPENAI_API_KEY not found in environment config file. Make sure it is configured correctly")
+            raise ValueError("OPENAI_API_KEY not found in environment file. Make sure it is configured correctly")
         elif api_key[:8] != "sk-proj-":
             raise ValueError("Invalid OPENAI_API_KEY format.")
         else:
@@ -55,11 +54,41 @@ class WebpageSummarizer:
         print(response.choices[0].message.content)
 
     def summarize_with_ollama(self):
+        print("Initializing the summarizer...")
         messages = self.get_summarize_messages()
+        print(f"Please wait for the response from {self.model}...")
         response = ollama.chat(model=self.model, messages=messages)
+        print(f"Response fetched from {self.model}!")
         print(response['message']['content'])
 
 
+def is_valid_url(url: str) -> bool:
+    parsed = urlparse(url)
+    return all([parsed.scheme, parsed.netloc])
+
+
+def is_reachable_url(url: str) -> bool:
+    try:
+        response = requests.head(url, timeout=3)
+        return response.status_code < 400
+    except requests.RequestException:
+        return False
+
+
+def prompt_for_url():
+    while True:
+        user_input = input("Enter the URL of the page to summarize: ").strip()
+        if not is_valid_url(user_input):
+            print("❌ Invalid URL. Please enter a valid URL (e.g. https://example.com)")
+            continue
+        if not is_reachable_url(user_input):
+            print("❌ Webpage in the given URL is not reachable. Retry with a different URL.")
+            continue
+        print(f"✅ Got valid URL: {user_input}")
+        return user_input
+
+
 if __name__ == '__main__':
-    webpage_summarizer = WebpageSummarizer("https://zapsolv.com")
+    url = prompt_for_url()
+    webpage_summarizer = WebpageSummarizer(url)
     webpage_summarizer.summarize_with_ollama()
