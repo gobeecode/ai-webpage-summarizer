@@ -12,7 +12,7 @@ load_dotenv()
 
 class WebpageSummarizer:
     def __init__(self, url: str):
-        self.model = os.getenv("MODEL")
+        self.model = os.getenv("MODEL") or 'llama3.2'
         if not self.model:
             raise ValueError("MODEL not found in environment config.")
         self.url = url
