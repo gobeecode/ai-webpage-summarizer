@@ -138,9 +138,9 @@ def main():
                 retry = 'y'
             if retry == 'y':
                 continue
-            else:
-                break
-    print("👋 Exiting SummarizIt. Goodbye!")
+        finally:
+            print("Exiting SummarizIt. Goodbye 👋")
+            break
 
 
 if __name__ == '__main__':
