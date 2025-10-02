@@ -23,16 +23,13 @@ Webpage summarizer built using python and artificial intelligence.
     python ./main.py
   ```
 - Enter the url of the webpage to be summarized.
+- Enter the platform name to be used for summarization. Default: ollama. Supported: ollama, openai.
+- Enter the model to use for summarization. Default: llama3.2
 - Wait for a few seconds for the summary to be retrieved.
 
 ## Configuration
-- By default, the script uses llama3.2 model. 
+- By default, the script uses llama3.2 model in ollama platform. 
 - If you want to use other opensource models, Follow the below steps.
   - Download them using `ollama run MODEL_NAME`.
   - To view the list of all available models, Click [here](https://ollama.com/search)
-    - Create a `.env` file at the root of the cloned repository.
-    - Create a variable MODEL and assign the value to the name of the model you want to use.
-    - For example to use gemma3 model, the .env file should have the below entry.
-      ```env
-        MODEL=gemma3
-      ```
+  - Enter the model name to use, when the script prompts for the model name.

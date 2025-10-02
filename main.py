@@ -1,4 +1,5 @@
 import os
+import time
 
 import ollama
 import openai
@@ -11,11 +12,9 @@ load_dotenv()
 
 
 class WebpageSummarizer:
-    def __init__(self, url: str):
-        self.model = os.getenv("MODEL") or 'llama3.2'
-        if not self.model:
-            raise ValueError("MODEL not found in environment config.")
+    def __init__(self, url: str, model: str):
         self.url = url
+        self.model = model
         response = requests.get(self.url)
         soup = BeautifulSoup(response.content, "html.parser")
         self.title = soup.title if soup.title else "Title not found"
@@ -51,23 +50,20 @@ class WebpageSummarizer:
             model=self.model,  # For example: gpt-4o-mini
             messages=messages
         )
-        print(response.choices[0].message.content)
+        print(f"\n\n{response.choices[0].message.content}")
 
     def summarize_with_ollama(self):
-        print("Initializing the summarizer...")
         messages = self.get_summarize_messages()
-        print(f"Please wait for the response from {self.model}...")
         response = ollama.chat(model=self.model, messages=messages)
-        print(f"Response fetched from {self.model}!")
-        print(response['message']['content'])
+        print(f"\n\n{response['message']['content']}")
 
 
-def is_valid_url(url: str) -> bool:
+def is_url_valid(url: str) -> bool:
     parsed = urlparse(url)
     return all([parsed.scheme, parsed.netloc])
 
 
-def is_reachable_url(url: str) -> bool:
+def is_url_reachable(url: str) -> bool:
     try:
         response = requests.head(url, timeout=3)
         return response.status_code < 400
@@ -77,18 +73,75 @@ def is_reachable_url(url: str) -> bool:
 
 def prompt_for_url():
     while True:
-        user_input = input("Enter the URL of the page to summarize: ").strip()
-        if not is_valid_url(user_input):
+        url = input("Enter the URL of the page to summarize: ").strip().lower()
+        if not is_url_valid(url):
             print("❌ Invalid URL. Please enter a valid URL (e.g. https://example.com)")
             continue
-        if not is_reachable_url(user_input):
+        if not is_url_reachable(url):
             print("❌ Webpage in the given URL is not reachable. Retry with a different URL.")
             continue
-        print(f"✅ Got valid URL: {user_input}")
-        return user_input
+        print(f"✅ Selected URL: {url}")
+        return url
+
+
+def prompt_for_platform():
+    while True:
+        platform = input("Enter the platform name: (Default: ollama. Supported: ollama, openai) ").strip().lower()
+        if not platform:
+            platform = 'ollama'
+        if platform not in ['ollama', 'openai']:
+            print("❌ Invalid platform. Please enter a valid platform name.")
+            continue
+        print(f"✅ Selected platform: {platform}")
+        return platform
+
+
+def prompt_for_model(platform: str):
+    while True:
+        if platform == 'openai':
+            model = input("Enter the model name (Default: gpt-4o-mini): ").strip().lower()
+            if not model:
+                model = 'gpt-4o-mini'
+        elif platform == 'ollama':
+            model = input("Enter the model name (Default: llama3.2): ").strip().lower()
+            if not model:
+                model = 'llama3.2'
+        else:
+            print(f"❌ Unsupported platform {platform}. Please select a valid platform.")
+            continue
+        print(f"✅ Selected model: {model}")
+        return model
+
+
+def main():
+    while True:
+        try:
+            url = prompt_for_url()
+            platform = prompt_for_platform()
+            model = prompt_for_model(platform)
+            webpage_summarizer = WebpageSummarizer(url, model)
+            print("Initializing SummarizeIt...")
+            print(f"Please wait while {model} summarizes the webpage. This might take a while...")
+            start = time.time()
+            if platform == 'openai':
+                webpage_summarizer.summarize_with_openai()
+            else:
+                webpage_summarizer.summarize_with_ollama()
+            end = time.time()
+            # Calculate elapsed time in seconds
+            elapsed_seconds = end - start
+            print(f"\n\n{model} summarized the webpage in {elapsed_seconds:.4f} seconds.")
+        except Exception as e:
+            print(f"❌ Failed to summarize the webpage. Exception: {e}")
+            retry = input("Do you want to retry? (Y/n): ").strip().lower()
+            if not retry:
+                retry = 'y'
+            if retry == 'y':
+                continue
+            else:
+                break
+    print("👋 Exiting SummarizIt. Goodbye!")
 
 
 if __name__ == '__main__':
-    url = prompt_for_url()
-    webpage_summarizer = WebpageSummarizer(url)
-    webpage_summarizer.summarize_with_ollama()
+    main()
