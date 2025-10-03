@@ -120,7 +120,7 @@ def main():
             platform = prompt_for_platform()
             model = prompt_for_model(platform)
             webpage_summarizer = WebpageSummarizer(url, model)
-            print("Initializing SummarizeIt...")
+            print("Initializing Summarizr AI...")
             print(f"Please wait while {model} summarizes the webpage. This might take a while...")
             start = time.time()
             if platform == 'openai':
@@ -139,7 +139,7 @@ def main():
             if retry == 'y':
                 continue
         finally:
-            print("Exiting SummarizIt. Goodbye 👋")
+            print("Exiting Summarizr AI. Goodbye 👋")
             break
 
 
