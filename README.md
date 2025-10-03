@@ -1,5 +1,5 @@
-# SummarizIt
-Webpage summarizer built using python and artificial intelligence.
+# Summarizr AI
+Webpage summarizer developed using python and artificial intelligence.
 
 ## Installation
 - Download and install Ollama application.
