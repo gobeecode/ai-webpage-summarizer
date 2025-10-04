@@ -1,13 +1,4 @@
-import os
-import time
-
-import ollama
-import openai
 from dotenv import load_dotenv
-import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urlparse
-
 from helpers.time_helper import TimeHelper
 from helpers.url_helper import UrlHelper
 from summarizer import Summarizer
@@ -63,15 +54,11 @@ def main():
             platform = prompt_for_platform()
             model = prompt_for_model(platform)
             webpage = Webpage(url)
-            text = webpage.text
-            summarizer = Summarizer(model=model, text=text)
+            summarizer = Summarizer(platform=platform, model=model, webpage=webpage)
             print("Initializing Summarizr AI...")
             print(f"Please wait while {model} summarizes the webpage. This might take a while...")
             with TimeHelper.measure('summarize'):
-                if platform == 'openai':
-                    summarizer.summarize_with_openai()
-                else:
-                    summarizer.summarize_with_ollama()
+                summarizer.summarize()
             elapsed = TimeHelper.get_elapsed('summarize')
             print(f"\n\n{model} summarized the webpage in {elapsed:.4f} seconds.")
             break
