@@ -8,32 +8,20 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 
+from helpers.time_helper import TimeHelper
+from helpers.url_helper import UrlHelper
 from summarizer import Summarizer
 from webpage import Webpage
 
 load_dotenv()
 
 
-def is_url_valid(url: str) -> bool:
-    parsed = urlparse(url)
-    return all([parsed.scheme, parsed.netloc])
-
-
-def is_url_reachable(url: str) -> bool:
-    try:
-        response = requests.head(url, timeout=3)
-        return response.status_code < 400
-    except requests.RequestException:
-        return False
-
 def prompt_for_url():
     while True:
         url = input("Enter the URL of the page to summarize: ").strip().lower()
-        if not is_url_valid(url):
-            print("❌ Invalid URL. Please enter a valid URL (e.g. https://example.com)")
+        if not UrlHelper.is_url_valid(url):
             continue
-        if not is_url_reachable(url):
-            print("❌ Webpage in the given URL is not reachable. Retry with a different URL.")
+        if not UrlHelper.is_url_reachable(url):
             continue
         print(f"✅ Selected URL: {url}")
         return url
@@ -79,15 +67,13 @@ def main():
             summarizer = Summarizer(model=model, text=text)
             print("Initializing Summarizr AI...")
             print(f"Please wait while {model} summarizes the webpage. This might take a while...")
-            start = time.time()
-            if platform == 'openai':
-                summarizer.summarize_with_openai()
-            else:
-                summarizer.summarize_with_ollama()
-            end = time.time()
-            # Calculate elapsed time in seconds
-            elapsed_seconds = end - start
-            print(f"\n\n{model} summarized the webpage in {elapsed_seconds:.4f} seconds.")
+            with TimeHelper.measure('summarize'):
+                if platform == 'openai':
+                    summarizer.summarize_with_openai()
+                else:
+                    summarizer.summarize_with_ollama()
+            elapsed = TimeHelper.get_elapsed('summarize')
+            print(f"\n\n{model} summarized the webpage in {elapsed:.4f} seconds.")
             break
         except Exception as e:
             print(f"❌ Failed to summarize the webpage. Exception: {e}")
