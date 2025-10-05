@@ -2,11 +2,13 @@ import ollama
 import openai
 
 from helpers.credential_helper import CredentialHelper
+from helpers.time_helper import TimeHelper
 from webpage import Webpage
 
 
 class Summarizer:
     def __init__(self, platform: str, model: str, webpage: Webpage):
+        self.platform = platform
         self.model = model
         self.text = webpage.text
 
@@ -24,7 +26,7 @@ class Summarizer:
         return messages
 
     def summarize(self):
-        print(f"Please wait while {model} summarizes the webpage. This might take a while...")
+        print(f"Please wait while {self.model} summarizes the webpage. This might take a while...")
         with TimeHelper.measure('summarize'):
             messages = self.get_summarize_messages()
             if self.platform == 'openai':
@@ -38,6 +40,6 @@ class Summarizer:
                 response = ollama.chat(model=self.model, messages=messages)
                 print(f"\n\n{response['message']['content']}")
             elapsed = TimeHelper.get_elapsed('summarize')
-            print(f"✅ Summarized the webpage using {model} in {elapsed:.4f} seconds.")
+            print(f"✅ Summarized the webpage using {self.model} in {elapsed:.4f} seconds.")
 
 

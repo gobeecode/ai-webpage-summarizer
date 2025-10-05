@@ -22,8 +22,8 @@ def prompt_for_url():
 def prompt_for_platform():
     while True:
         supported_platforms = ['ollama', 'openai']
-        platform = input(f"Enter the platform name: (Default: {supported_platforms[0]}. "
-                         f"Supported: {supported_platforms}) ").strip().lower()
+        platform = input(f"Enter the platform name (Default: {supported_platforms[0]}. "
+                         f"Supported: {supported_platforms}):  ").strip().lower()
         if not platform:
             platform = supported_platforms[0]
         if platform not in supported_platforms:
