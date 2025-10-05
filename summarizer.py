@@ -1,4 +1,3 @@
-import os
 import ollama
 import openai
 
@@ -25,16 +24,20 @@ class Summarizer:
         return messages
 
     def summarize(self):
-        messages = self.get_summarize_messages()
-        if self.platform == 'openai':
-            CredentialHelper.validate_openai_api_key()
-            response = openai.chat.completions.create(
-                model=self.model,  # For example: gpt-4o-mini
-                messages=messages
-            )
-            print(f"\n\n{response.choices[0].message.content}")
-        else:
-            response = ollama.chat(model=self.model, messages=messages)
-            print(f"\n\n{response['message']['content']}")
+        print(f"Please wait while {model} summarizes the webpage. This might take a while...")
+        with TimeHelper.measure('summarize'):
+            messages = self.get_summarize_messages()
+            if self.platform == 'openai':
+                CredentialHelper.validate_openai_api_key()
+                response = openai.chat.completions.create(
+                    model=self.model,  # For example: gpt-4o-mini
+                    messages=messages
+                )
+                print(f"\n\n{response.choices[0].message.content}")
+            else:
+                response = ollama.chat(model=self.model, messages=messages)
+                print(f"\n\n{response['message']['content']}")
+            elapsed = TimeHelper.get_elapsed('summarize')
+            print(f"✅ Summarized the webpage using {model} in {elapsed:.4f} seconds.")
 
 
