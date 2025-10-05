@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from helpers.url_helper import UrlHelper
+from helpers.url_helper import URLHelper
 from summarizer import Summarizer
 from webpage import Webpage
 
@@ -10,23 +10,26 @@ load_dotenv()
 def prompt_for_url():
     while True:
         url = input("Enter the URL of the page to summarize: ").strip().lower()
-        if not UrlHelper.is_url_valid(url):
+        url = URLHelper.normalize_url(url)
+        if not URLHelper.is_url_valid(url):
             continue
-        if not UrlHelper.is_url_reachable(url):
+        if not URLHelper.is_url_reachable(url):
             continue
-        print(f"️ℹ️ Selected URL: {url}")
+        print(f"ℹ️ Selected URL: {url}")
         return url
 
 
 def prompt_for_platform():
     while True:
-        platform = input("Enter the platform name: (Default: ollama. Supported: ollama, openai) ").strip().lower()
+        supported_platforms = ['ollama', 'openai']
+        platform = input(f"Enter the platform name: (Default: {supported_platforms[0]}. "
+                         f"Supported: {supported_platforms}) ").strip().lower()
         if not platform:
-            platform = 'ollama'
-        if platform not in ['ollama', 'openai']:
+            platform = supported_platforms[0]
+        if platform not in supported_platforms:
             print("❌ Invalid platform. Please enter a valid platform name.")
             continue
-        print(f"️ℹ️ Selected platform: {platform}")
+        print(f"ℹ️ Selected platform: {platform}")
         return platform
 
 
