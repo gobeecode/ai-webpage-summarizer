@@ -17,8 +17,7 @@ class Summarizer:
                          "ignoring text that might be navigation related. Respond in markdown.")
         user_prompt = (f"You should provide a short summary of this content in markdown. "
                        f"If it includes news or announcements, then summarize these too. "
-                       f"The contents to be summarized given as below. "
-                       f"{self.text}")
+                       f"The contents to be summarized given as below. {self.text}")
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
@@ -41,5 +40,5 @@ class Summarizer:
                 print(f"\n\n{response['message']['content']}")
             elapsed = TimeHelper.get_elapsed('summarize')
             print(f"✅ Summarized the webpage using {self.model} in {elapsed:.4f} seconds.")
-
+            TimeHelper.clear('summarize')
 
